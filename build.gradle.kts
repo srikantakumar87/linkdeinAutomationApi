@@ -35,4 +35,7 @@ dependencies {
     implementation("org.mongodb:mongodb-driver-kotlin-coroutine:5.2.0")
     implementation("org.mongodb:bson-kotlin:5.2.0")
     implementation("commons-codec:commons-codec:1.15")
+
+
+    testImplementation("io.mockk:mockk:1.13.12")
 }

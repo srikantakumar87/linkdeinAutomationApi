@@ -18,7 +18,8 @@ fun main(args: Array<String>) {
 fun Application.module() {
 
     val mongoClient = configureMongoDB()
-    val userDataSource = MongoUserDataSource(mongoClient.getDatabase("ktor-auth"))
+    val dbName = environment.config.property("database.dbName").getString()
+    val userDataSource = MongoUserDataSource(mongoClient.getDatabase(dbName))
     val tokenConfig = configureToken()
     val tokenService = JwtTokenService()
     val hashingService = SHA256HashingService()
@@ -35,11 +36,15 @@ private val logger = LoggerFactory.getLogger("Application")
 fun Application.configureMongoDB(): MongoClient {
     val mongoPw = System.getenv("MONGO_PW")
         ?: throw IllegalArgumentException("Missing MongoDB password environment variable")
+    val cMongoPw = System.getenv("C_MONGO_PW")
+        ?: throw IllegalArgumentException("Missing MongoDB password environment variable")
     val mongoUserName = environment.config.property("database.userName").getString()
+    val cUserName = environment.config.property("database.cuserName").getString()
     val dbName = environment.config.property("database.dbName").getString()
-    val uri = "mongodb+srv://$mongoUserName:$mongoPw@cluster0.tc6er.mongodb.net/$dbName?retryWrites=true&w=majority&appName=Cluster0"
+    //val uri = "mongodb+srv://$mongoUserName:$mongoPw@cluster0.tc6er.mongodb.net/$dbName?retryWrites=true&w=majority&appName=Cluster0"
+    val uri = "mongodb://$cUserName:$cMongoPw@64.227.147.49:27017/?authMechanism=SCRAM-SHA-1"
 
-    logger.info("Connecting to MongoDB at $dbName with user $mongoUserName")
+    logger.info("Connecting to MongoDB at ktor with user srikanta")
 
     return MongoClient.create(uri)
 }

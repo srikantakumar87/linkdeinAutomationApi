@@ -12,4 +12,5 @@ jwt:
 
 database:
   userName: "srikantakusubudhi"
-  dbName: "ktor-auth"
+  cuserName: "srikanta"
+  dbName: "ktor"
