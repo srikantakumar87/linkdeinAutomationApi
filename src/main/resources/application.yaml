@@ -14,3 +14,6 @@ database:
   userName: "srikantakusubudhi"
   cuserName: "srikanta"
   dbName: "ktor"
+  domain: "127.0.0.1"
+  port: "27017"
+

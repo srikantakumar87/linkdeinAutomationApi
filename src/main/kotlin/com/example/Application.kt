@@ -1,6 +1,7 @@
 package com.example
 
 
+import com.example.data.jobInfo.MongoJobInfoDataSource
 import com.example.data.user.MongoUserDataSource
 import com.example.plugins.*
 import com.example.security.hashing.SHA256HashingService
@@ -8,11 +9,15 @@ import com.example.security.token.JwtTokenService
 import com.example.security.token.TokenConfig
 import io.ktor.server.application.*
 import com.mongodb.kotlin.client.coroutine.MongoClient
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpMethod
+import io.ktor.server.netty.EngineMain
 import org.slf4j.LoggerFactory
+import io.ktor.server.plugins.cors.routing.CORS
 
 
 fun main(args: Array<String>) {
-    io.ktor.server.netty.EngineMain.main(args)
+    EngineMain.main(args)
 }
 
 fun Application.module() {
@@ -20,32 +25,35 @@ fun Application.module() {
     val mongoClient = configureMongoDB()
     val dbName = environment.config.property("database.dbName").getString()
     val userDataSource = MongoUserDataSource(mongoClient.getDatabase(dbName))
+
+    val jobInfoDataSource = MongoJobInfoDataSource(mongoClient.getDatabase(dbName))
     val tokenConfig = configureToken()
     val tokenService = JwtTokenService()
     val hashingService = SHA256HashingService()
 
     configureMonitoring()
     configureSerialization()
+    configureCORS() // Enable CORS
     configureSecurity(tokenConfig)
-    configureRouting(userDataSource, hashingService, tokenService, tokenConfig)
+    configureRouting(
+        userDataSource, hashingService, tokenService, tokenConfig,
+        jobInfoDataSource
+    )
 }
 
 // Add a logger for better traceability
 private val logger = LoggerFactory.getLogger("Application")
 
 fun Application.configureMongoDB(): MongoClient {
-    val mongoPw = System.getenv("MONGO_PW")
-        ?: throw IllegalArgumentException("Missing MongoDB password environment variable")
     val cMongoPw = System.getenv("C_MONGO_PW")
         ?: throw IllegalArgumentException("Missing MongoDB password environment variable")
     val mongoUserName = environment.config.property("database.userName").getString()
     val cUserName = environment.config.property("database.cuserName").getString()
     val dbName = environment.config.property("database.dbName").getString()
-    //val uri = "mongodb+srv://$mongoUserName:$mongoPw@cluster0.tc6er.mongodb.net/$dbName?retryWrites=true&w=majority&appName=Cluster0"
-    val uri = "mongodb://$cUserName:$cMongoPw@64.227.147.49:27017/?authMechanism=SCRAM-SHA-1"
-
+    val dbDomain = environment.config.property("database.domain").getString()
+    val dbPort = environment.config.property("database.port").getString()
+    val uri = "mongodb://$cUserName:$cMongoPw@$dbDomain:$dbPort/?authMechanism=SCRAM-SHA-1"
     logger.info("Connecting to MongoDB at ktor with user srikanta")
-
     return MongoClient.create(uri)
 }
 
@@ -66,4 +74,22 @@ fun Application.configureToken(): TokenConfig {
         secret = secret,
         realm = realm
     )
+}
+// CORS Configuration function
+fun Application.configureCORS() {
+    install(CORS) {
+        anyHost()
+        //allowHost("localhost:8585")  // Allow specific host (e.g., frontend on localhost:3000)
+        //allowHost("example.com")      // Add more allowed hosts as needed
+
+        allowHeader(HttpHeaders.ContentType)
+        allowHeader(HttpHeaders.Authorization) // Allow authorization header for token-based auth
+
+        allowMethod(HttpMethod.Get)
+        allowMethod(HttpMethod.Post)
+        allowMethod(HttpMethod.Put)
+        allowMethod(HttpMethod.Delete)
+
+        allowCredentials = true // Allow sending credentials (like cookies) with requests
+    }
 }

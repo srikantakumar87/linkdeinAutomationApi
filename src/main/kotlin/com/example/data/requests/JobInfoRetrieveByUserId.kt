@@ -1,3 +1,8 @@
 package com.example.data.requests
 
-data class JobInfoRetrieveByUserId()
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class JobInfoRetrieveByUserId(
+    var userId: String
+)

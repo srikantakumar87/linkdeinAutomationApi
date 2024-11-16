@@ -3,6 +3,8 @@
 ktor-version = "3.0.0-rc-2"
 kotlin-version = "2.0.20"
 logback-version = "1.4.14"
+kotlin-serialization-version = "2.0.20"
+kotlin-coroutine-version = "2.0.20"
 
 [libraries]
 ktor-server-call-logging = { module = "io.ktor:ktor-server-call-logging-jvm", version.ref = "ktor-version" }
@@ -16,7 +18,9 @@ logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "lo
 ktor-server-config-yaml = { module = "io.ktor:ktor-server-config-yaml", version.ref = "ktor-version" }
 ktor-server-test-host = { module = "io.ktor:ktor-server-test-host-jvm", version.ref = "ktor-version" }
 kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin-version" }
+kotlin-coroutine = {module = "org.mongodb:mongodb-driver-kotlin-coroutine", version.ref = "kotlin-coroutine-version"}
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin-version" }
 ktor = { id = "io.ktor.plugin", version.ref = "ktor-version" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin-serialization-version" }
